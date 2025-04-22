@@ -1,5 +1,5 @@
 import styles from "./app.module.css"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "./components/Button"
 import { Header } from "./components/Header"
 import { Input } from "./components/Input"
@@ -15,11 +15,13 @@ function App() {
   const [lettersUsed, setLettersUsed] = useState<LetterUsedProps[]>([])
   const [challenge, setChallenge] = useState<Challenge | null>(null)
 
+  const inputRef = useRef<HTMLInputElement>(null)
+
   const ATTEMPTS_MARGIN: number = 5
 
   function handleRestartGame() {
     const isConfirmed = window.confirm("Você tem certeza que deseja reiniciar?")
-    
+
     if (isConfirmed) {
       startGame()
     }
@@ -35,7 +37,9 @@ function App() {
     setLettersUsed([])
   }
 
-  function handleConfirm() {
+  function handleConfirm(e: React.FormEvent) {
+    e.preventDefault()
+
     if (!challenge) {
       return
     }
@@ -65,6 +69,8 @@ function App() {
     setLettersUsed((prevState) => [...prevState, { value, correct }])
     setScore(currentScore)
     setLetter("")
+
+    inputRef.current?.focus()
   }
 
   function endGame(message: string) {
@@ -127,16 +133,17 @@ function App() {
 
         <h4>Palpite</h4>
 
-        <div className={styles.guess}>
+        <form onSubmit={handleConfirm} className={styles.guess}>
           <Input
+            ref={inputRef}
             autoFocus
             maxLength={1}
             placeholder="?"
             value={letter}
             onChange={(e) => setLetter(e.target.value)}
           />
-          <Button title="Confirmar" onClick={handleConfirm} />
-        </div>
+          <Button type="submit" title="Confirmar" />
+        </form>
 
         <LettersUsed data={lettersUsed} />
       </main>
